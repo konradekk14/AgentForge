@@ -20,6 +20,10 @@
           {
             "type": "command",
             "command": ".claude/hooks/audit-log.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/require-tests.sh"
           }
         ]
       }
@@ -31,16 +35,6 @@
           {
             "type": "command",
             "command": ".claude/hooks/block-secrets.sh"
-          }
-        ]
-      }
-    ],
-    "PostCommit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/require-tests.sh"
           }
         ]
       }
