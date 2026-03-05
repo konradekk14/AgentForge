@@ -1,0 +1,6 @@
+.env
+logs/
+node_modules/
+.planning/
+.DS_Store
+*.log
