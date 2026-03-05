@@ -1,60 +1,79 @@
 # AgentForge
 
-A meta-system that generates fully configured multi-agent Claude Code scaffolds for any project.
+A meta-system that generates fully configured multi-agent Claude Code projects. Describe what you want to build, and AgentForge interviews you, designs the architecture, and writes a complete runnable scaffold.
 
-## What It Does
+## Prerequisites
 
-Describe a project. AgentForge interviews you, designs a multi-agent architecture, gets your approval, then writes a complete ready-to-run scaffold to disk.
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed and authenticated
+- Anthropic API key (set as `ANTHROPIC_API_KEY` environment variable)
 
 ## Quick Start
 
-1. Clone this repo
-2. Copy `.env.example` to `.env` and fill in your values
-3. Open the project in Claude Code
-4. Tell Claude: "I want to build [your project description]"
-5. Answer the interview questions (6-8 focused questions)
-6. Review the proposed architecture
-7. Approve, and AgentForge writes your scaffold
+1. Clone this repo and `cd AgentForge`
+2. Open with Claude Code: `claude`
+3. Run `/new-project` or describe what you want to build
+4. Answer 7 interview questions
+5. Review the proposed architecture
+6. Approve, and AgentForge writes your scaffold to `output/`
+
+## How It Works
+
+AgentForge runs a 5-phase pipeline using Claude Code subagents:
+
+1. **Interview** — Structured questions extract project requirements
+2. **Research** — Scans templates and past lessons for relevant patterns
+3. **Architecture** — Designs agent topology, permissions, and handoff protocol (uses Opus)
+4. **Scaffold** — Writes the complete project after your approval
+5. **Review** — Validates security, quality, and completeness
+
+Every phase produces a file in `handoffs/`. Nothing proceeds past architecture without your explicit approval.
 
 ## Project Structure
 
 ```
 AgentForge/
-├── CLAUDE.md              # Root orchestrator instructions
-├── ARCHITECTURE.md        # System architecture
-├── DECISIONS.md           # Design decisions and assumptions
-├── agents/                # Agent personas (one CLAUDE.md each)
-│   ├── forge-orchestrator/
-│   ├── interview-agent/
-│   ├── research-agent/
-│   ├── architect-agent/
-│   ├── scaffolder-agent/
-│   └── reviewer-agent/
-├── handoffs/              # File-based agent communication
-├── tasks/                 # Task tracking and lessons learned
-├── logs/                  # Audit logs
-└── templates/             # Scaffold templates
+├── CLAUDE.md                    # Orchestrator brain
+├── .claude/
+│   ├── settings.json            # Hook configuration
+│   ├── agents/                  # 5 subagent definitions
+│   ├── hooks/                   # Security and audit hooks
+│   └── skills/new-project/      # /new-project command
+├── templates/                   # Base architecture templates
+├── handoffs/                    # Agent communication artifacts
+├── output/                      # Generated scaffolds
+├── tasks/                       # Tracking and lessons
+└── logs/                        # Audit trail
 ```
 
-## How It Works
+## Security Model
 
-1. **Interview**: Structured questions extract project type, users, integrations, stack, and destructive operations
-2. **Research**: Queries past patterns from claude-mem and lessons learned
-3. **Architecture**: Designs agent topology with CAN/CANNOT constraints, handoff protocols, security posture
-4. **Human Gate**: You review and approve the architecture before anything is written
-5. **Scaffold**: Writes all CLAUDE.md files, directory structure, configs, and docs
-6. **Review**: Validates no secrets, no over-permissioned agents, audit hooks present
+- **No secrets in files**: `block-secrets.sh` hook scans for credential patterns and blocks writes
+- **Audit trail**: `audit-log.sh` logs every tool use to `logs/audit.log`
+- **Test enforcement**: `require-tests.sh` ensures generated scaffolds include tests
+- **Human gate**: Architecture must be approved before scaffolding begins
+- **Permission model**: Every generated agent has explicit CAN/CANNOT constraints
 
-## Requirements
+## Templates
 
-- Claude Code CLI
-- Anthropic API key
-- Optional: claude-mem for pattern memory across runs
+AgentForge includes base architecture templates for common project types:
 
-## Security
+- `web-app` — Full-stack web applications
+- `agent-pipeline` — Multi-agent AI systems
+- `cli-tool` — Command-line tools
+- `data-pipeline` — ETL/data processing systems
 
-- No secrets in any generated file (reviewer hard-fails on API key patterns)
-- All credentials via environment variables
-- Every agent has explicit CAN/CANNOT permissions
-- Human approval required before writing to disk
-- Full audit trail in `logs/audit.log`
+## What Gets Generated
+
+A complete, runnable Claude Code project including:
+
+- `CLAUDE.md` with full agent instructions
+- Agent definitions with scoped permissions
+- Hook configurations for security
+- `.env.example`, `.gitignore`, `README.md`
+- `DECISIONS.md` documenting architectural choices
+- Test files for every agent
+- Task tracking files
+
+## License
+
+MIT

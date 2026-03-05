@@ -1,32 +1,19 @@
-# AgentForge Tasks
+# AgentForge v2 Tasks
 
-## Phase 1: Core Pipeline
-- [ ] Implement interview-agent conversation flow (6-8 questions, structured brief.md output)
-- [ ] Implement research-agent claude-mem query integration
-- [ ] Implement architect-agent topology design logic
-- [ ] Build forge-orchestrator routing and sequencing
-- [ ] Implement scaffolder-agent file generation from ARCHITECTURE.md
-- [ ] Implement reviewer-agent validation checks (secrets, permissions, tests)
-- [ ] Wire up file-based handoff protocol between all agents
+## Verification
+- [ ] Run /new-project end-to-end with a test project
+- [ ] Verify audit-log.sh captures tool events
+- [ ] Verify block-secrets.sh blocks credential patterns
+- [ ] Verify require-tests.sh enforces test files in output
+- [ ] Confirm human gate blocks scaffolding without approval
+- [ ] Test self-healing loop (force a reviewer FAIL, verify retry)
+- [ ] Validate generated scaffold runs in Claude Code without manual fixes
 
-## Phase 2: Quality & Security
-- [ ] Add audit logging to forge-orchestrator (timestamped, every action)
-- [ ] Implement self-healing loop (retry up to 3, then escalate)
-- [ ] Add API key pattern detection to reviewer-agent
-- [ ] Implement human gate for architecture approval
-- [ ] Add CAN/CANNOT enforcement validation
-
-## Phase 3: Integration
-- [ ] GSD wave sequencing integration
-- [ ] Ruflo parallel execution (research + architect)
-- [ ] claude-mem read/write integration
-- [ ] Template system for common scaffold patterns
-
-## Phase 4: Polish
-- [ ] End-to-end test: describe a project, get a working scaffold
-- [ ] Error messages and failure reporting
-- [ ] Documentation review and update
-- [ ] Lessons.md auto-update after each run
+## Improvements
+- [ ] Add more templates as patterns emerge
+- [ ] Tune interviewer questions based on real usage
+- [ ] Add hook for file size limits on generated scaffolds
+- [ ] Consider parallel research + early architect work
 
 ---
 

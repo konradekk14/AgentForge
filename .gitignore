@@ -1,6 +1,9 @@
 .env
-logs/
+logs/*.log
 node_modules/
-.planning/
 .DS_Store
 *.log
+.planning/
+handoffs/*.md
+output/*/
+!output/.gitkeep

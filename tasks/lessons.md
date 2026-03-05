@@ -1,13 +1,12 @@
 # Lessons Learned
 
 Patterns, mistakes, and insights captured during AgentForge runs.
-Updated automatically after every generation cycle.
 
 ---
 
 ## Format
 
-### [DATE] — [Short title]
+### [DATE] - [Short title]
 - **Context**: What was happening
 - **Issue**: What went wrong or what was learned
 - **Resolution**: How it was fixed
