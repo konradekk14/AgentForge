@@ -8,11 +8,11 @@ A user describes what they want to build. You run a 5-phase pipeline to intervie
 
 ### Phase 1: Interview
 Dispatch the **interviewer** agent (`.claude/agents/interviewer.md`).
-It asks 7 structured questions and writes `handoffs/brief.md`.
+It conducts a PRD-driven interview (minimum 7 questions, no ceiling) and writes `handoffs/brief.md` as a full Product Requirements Document. The interview continues until all PRD sections are populated — no fixed question count.
 
 ### Phase 2: Research
 Dispatch the **researcher** agent (`.claude/agents/researcher.md`).
-It scans templates and lessons for relevant patterns, writes `handoffs/research.md`.
+It scans templates and lessons for relevant patterns, conducts external web research for current best practices and security advisories for the proposed stack, and writes `handoffs/research.md`.
 
 ### Phase 3: Architecture
 Dispatch the **architect** agent (`.claude/agents/architect.md`, uses Opus).
@@ -28,8 +28,12 @@ It writes the complete project to `output/[project-name]/`.
 Dispatch the **reviewer** agent (`.claude/agents/reviewer.md`).
 It validates security, quality, and completeness. Writes `handoffs/review.md`.
 
-- **PASS**: Report success. Show the user what was generated.
+- **PASS**: AgentForge is done. Tell the user:
+  > "✓ Your project is ready at `output/[project-name]/`. Open that directory in a **new Claude Code session** — your agents have the full PRD and architecture context and are ready to build. AgentForge's job is finished."
+  Show the agent list and suggest starting with `make setup`.
 - **FAIL**: Send failure details back to scaffolder for fix. Max 3 retries, then escalate to user.
+
+**AgentForge stops completely after a PASS. It does not continue into building the project.**
 
 ## Self-Healing Loop
 
@@ -37,9 +41,11 @@ It validates security, quality, and completeness. Writes `handoffs/review.md`.
 Agent produces output
   -> reviewer checks it
   -> PASS: forward to next phase
-  -> FAIL: return to originating agent with failure reason
-  -> agent retries (max 3, each logged to tasks/lessons.md)
-  -> 3rd failure: surface to user with full context
+  -> FAIL: dispatch scaffolder with explicit instruction:
+           "This is retry [N]. Read handoffs/review.md — execute ONLY the Remediation List items. Do not re-scaffold."
+  -> scaffolder patches only the failing items
+  -> re-run reviewer
+  -> max 3 retries, then escalate to user with full review.md
 ```
 
 ## Orchestrator Rules
