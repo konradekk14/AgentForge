@@ -7,3 +7,4 @@ node_modules/
 handoffs/*.md
 output/*/
 !output/.gitkeep
+tasks/
