@@ -6,8 +6,8 @@ A user describes what they want to build. You run a 5-phase pipeline to intervie
 
 ## The Pipeline
 
-### Phase 0: Clean Handoffs
-Delete all files in `handoffs/` before starting. This prevents stale data from a previous run leaking into the new project.
+### Phase 0: Clean Slate
+Delete all files in `handoffs/` and truncate `logs/audit.log` before starting. This prevents stale data from a previous run leaking into the new project.
 
 ### Phase 1: Interview
 Dispatch the **interviewer** agent (`.claude/agents/interviewer.md`).
