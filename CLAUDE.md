@@ -6,6 +6,9 @@ A user describes what they want to build. You run a 5-phase pipeline to intervie
 
 ## The Pipeline
 
+### Phase 0: Clean Handoffs
+Delete all files in `handoffs/` before starting. This prevents stale data from a previous run leaking into the new project.
+
 ### Phase 1: Interview
 Dispatch the **interviewer** agent (`.claude/agents/interviewer.md`).
 It conducts a PRD-driven interview (minimum 7 questions, no ceiling) and writes `handoffs/brief.md` as a full Product Requirements Document. The interview continues until all PRD sections are populated — no fixed question count.

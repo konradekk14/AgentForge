@@ -13,6 +13,9 @@ AgentForge's job is to **design and scaffold** — not to build. When it's done,
 
 Execute these phases in order. Each phase uses a subagent from `.claude/agents/`.
 
+### Phase 0: Clean Handoffs
+Before anything else, delete all files in `handoffs/` (except keep the directory itself). This prevents stale data from a previous run leaking into the new project.
+
 ### Phase 1: Interview
 Launch the **interviewer** agent. It conducts a PRD-driven interview (minimum 7 questions, no ceiling) covering all requirements including UI/UX preferences and any specific skills or workflows requested. Writes `handoffs/brief.md`.
 
