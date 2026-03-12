@@ -135,3 +135,4 @@ Write `handoffs/ARCHITECTURE.md` with this structure:
 - Every generated project MUST have: orchestrator + domain agents + reviewer
 - API Contract table is REQUIRED for any project with HTTP endpoints
 - Infrastructure Requirements section is REQUIRED for any non-trivial project
+- When specifying agent responsibilities in ARCHITECTURE.md, list each agent's owned FRs by number (e.g., "FR-1, FR-3"). These numbers MUST transfer into the Responsibilities section of the generated agent file — not just Project Context.

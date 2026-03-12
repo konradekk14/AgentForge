@@ -41,7 +41,7 @@ Launch the **reviewer** agent. It validates PRD fidelity, security, infrastructu
 - If **PASS**: AgentForge is done. Tell the user:
   > "✓ Your project is ready at `output/[project-name]/`. Open that directory in a **new Claude Code session** — your agents have the full context and are ready to build. Run `make setup` first."
   Show the generated agent list. **Stop here — do not start building.**
-- If **FAIL**: Send failure details back to the scaffolder for remediation (max 3 retries). After 3 failures, escalate to the user.
+- If **FAIL**: Send failure details back to the scaffolder for remediation (max 3 retries). After 3 failures, output the Escalation Protocol message defined in `CLAUDE.md ## Escalation Protocol` and stop. Do not retry without explicit user instruction.
 
 ## Boundary
 

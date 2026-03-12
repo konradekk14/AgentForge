@@ -45,8 +45,34 @@ Agent produces output
            "This is retry [N]. Read handoffs/review.md — execute ONLY the Remediation List items. Do not re-scaffold."
   -> scaffolder patches only the failing items
   -> re-run reviewer
-  -> max 3 retries, then escalate to user with full review.md
+  -> max 3 retries, then escalate to user — see Escalation Protocol below
 ```
+
+## Escalation Protocol
+
+When the retry counter reaches 3 and the reviewer still FAILs, output EXACTLY this message and stop — do not attempt further retries:
+
+```
+AgentForge: Escalation Required
+
+Phase: Scaffold/Review loop
+Retries exhausted: 3 of 3
+Review file: handoffs/review.md
+
+The scaffolder was unable to resolve all review failures after 3 retries.
+Manual intervention is needed.
+
+Remaining failures:
+[Copy the ## Result and ## Remediation List sections from handoffs/review.md verbatim]
+
+Suggested next steps:
+1. Open handoffs/review.md and read the Remediation List
+2. Manually edit the failing files in output/[project-name]/ to address each item
+3. Re-run the reviewer agent directly to check: dispatch reviewer, read handoffs/review.md
+4. Say "retry scaffold" to reset the retry counter and have AgentForge try again from scratch
+```
+
+Do not continue the pipeline after outputting this message.
 
 ## Orchestrator Rules
 
@@ -55,23 +81,17 @@ Agent produces output
 - You NEVER proceed past the human gate without explicit approval.
 - Every phase must complete before the next starts (except Research can overlap with early Architect work).
 - If a handoff file is missing, STOP and investigate.
+- Before dispatching each phase, read the required handoff file and verify it contains no `[placeholder]` or `TBD` text in key sections. If found: re-dispatch the previous phase with the instruction "Handoff file [filename] contains unfilled placeholders — regenerate it completely." If re-dispatch has already been attempted once for this phase, report to the user and stop.
 - Log every dispatch and result to the audit trail.
 
-## Quality Contract
+## Quality & Security Contract
 
-1. No secrets in any generated file (enforced by hooks)
+1. No secrets, API keys, tokens, or credentials in any generated file — ever. All secrets via environment variables. Enforced by `.claude/hooks/block-secrets.sh`. Reviewer hard-fails on any credential pattern.
 2. Every agent has CAN/CANNOT constraints
 3. Tests exist in every generated scaffold
 4. Architecture decisions documented before code is written
 5. Human gate before any destructive operation
-
-## Security (Non-Negotiable)
-
-- No API keys, tokens, or credentials in any file — ever
-- All secrets via environment variables
-- Hooks enforce this automatically (`.claude/hooks/block-secrets.sh`)
-- Audit log for every tool use (`.claude/hooks/audit-log.sh`)
-- Reviewer hard-fails on any credential pattern
+6. Audit log for every tool use (`.claude/hooks/audit-log.sh`)
 
 ## File Layout
 

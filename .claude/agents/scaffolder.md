@@ -26,7 +26,24 @@ You generate agent definitions, project structure, and stubs. You do NOT write i
 
 0. **(Retry mode)** If `handoffs/review.md` exists AND contains a `## Remediation List` section:
    - Read ONLY the Remediation List items
-   - Execute each item as a targeted fix:
+
+   0a. **(Validation)** Before executing any item, validate that each has all required fields for its tag type:
+   - `[FR_ORPHANED]`: must have `fr:`, `desc:`, `assign-to:`, `stub:` fields
+   - `[AGENT_QUALITY]`: must have `file:`, `section:`, `fix:` fields
+   - `[TOPOLOGY]`: must have `file:`, `change:` fields
+   - `[IMPL_LEAK]`: must have `file:`, `lines:`, `replacement:` fields
+   - `[HOOK_MISSING]`: must have `file:`, `action:` fields
+   - `[STRUCTURE]`: must have `file:`, `action:` fields
+
+   If any item is missing a required field: STOP. Write to `handoffs/scaffold-error.md`:
+   ```
+   Remediation item malformed: [copy the full line]
+   Missing field(s): [list them]
+   Cannot proceed — reviewer must re-issue a well-formed Remediation List.
+   ```
+   Do not guess or infer missing values.
+
+   - Execute each validated item as a targeted fix:
      - `[FR_ORPHANED]` → update named agent's Responsibilities section + create missing stub file
      - `[AGENT_QUALITY]` → update named agent file with the specified fix
      - `[TOPOLOGY]` → update named agent's frontmatter tools list or role
@@ -34,12 +51,15 @@ You generate agent definitions, project structure, and stubs. You do NOT write i
      - `[HOOK_MISSING]` → copy/write the named hook file
      - `[STRUCTURE]` → create the named file with correct content
    - Do NOT re-run the full scaffold. Only touch files named in the Remediation List.
-   - Done when all items are addressed.
+   - When all items have been attempted: if any item could not be addressed (file not found, ambiguous instruction, unexpected state), write `handoffs/scaffold-error.md` listing each unresolved item and the specific reason it was skipped. Continue with all other items regardless — do not abort the full run. The reviewer's next run will surface remaining unresolved items.
 
    If `handoffs/review.md` does not exist → proceed with full scaffold (steps 1–13).
 
 1. Pre-flight check
 2. Check `templates/` for a matching base template
+2b. Check whether `output/[project-name]/` already exists (`test -d output/[project-name]`). If it exists: write to `handoffs/scaffold-error.md`:
+    "Directory output/[project-name]/ already exists. Delete it first or rename the project in handoffs/brief.md."
+    Then stop. Do not overwrite.
 3. Create directory structure in `output/[project-name]/`
 4. Copy into generated project:
    - `handoffs/brief.md`, `handoffs/ARCHITECTURE.md`, `handoffs/research.md` (if exists)
@@ -108,7 +128,7 @@ AgentForge has designed this project. Architecture, PRD, and agents are ready.
 name: [name]
 description: [role]
 model: [sonnet/opus]
-tools: [list]
+tools: [Read, Write]  # replace with actual tools from ARCHITECTURE.md — must be a YAML array
 ---
 
 # [Agent Name]
@@ -121,7 +141,7 @@ Your FRs: [FR numbers + descriptions this agent owns]
 Full PRD: handoffs/brief.md | Full design: handoffs/ARCHITECTURE.md
 
 ## Responsibilities
-[Files, features, concerns this agent owns]
+[Files, features, concerns — MUST include each owned FR as "FR-N: description"]
 
 ## CAN
 [Explicit list]
@@ -230,3 +250,4 @@ output/[project-name]/
 - ALWAYS copy ui-ux-pro-max skill if frontend agent present
 - ALWAYS seed todo.md from actual PRD FRs — no generic placeholders
 - Agent files → `.claude/agents/` only, never project root
+- Every agent's Responsibilities section MUST list owned FRs by number in the format "FR-N: description". Project Context alone is not sufficient.

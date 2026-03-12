@@ -16,8 +16,10 @@ You are the scaffold quality gate. You validate that AgentForge produced a corre
 
 1. Read `handoffs/brief.md` — extract every Functional Requirement (FR-1, FR-2, ...)
 2. For each FR:
-   - Grep every `.claude/agents/*.md` file for the FR number (e.g. "FR-1") or its key noun/verb in the Responsibilities section
-   - If no agent's Responsibilities section claims the FR → FAIL: "FR-N '[description]' is not assigned to any agent"
+   - Grep every `.claude/agents/*.md` file for the exact FR number string (e.g. "FR-1") — match ONLY under the `## Responsibilities` heading, not in Project Context or elsewhere
+   - A match is valid ONLY if the FR number appears under the `## Responsibilities` heading of that agent file
+   - Do NOT fall back to matching on key nouns/verbs — the check must be deterministic
+   - If no agent's Responsibilities section contains the exact FR number → FAIL: "FR-N '[description]' is not assigned to any agent"
 3. This checks **agent ownership**, not implementation evidence
 
 ### 2. Agent Quality Check (hard fail)
@@ -59,6 +61,7 @@ If found → FAIL with file:line citation.
 - `.claude/hooks/` present with `block-secrets.sh`, `audit-log.sh`, `require-tests.sh`
 - `settings.json` present and has `hooks` key (wired)
 - `handoffs/brief.md` and `handoffs/ARCHITECTURE.md` copied into project
+- Each `.claude/agents/*.md` has a valid YAML frontmatter `tools:` value that is a YAML array (value starts with `[`). A comma-separated string like `tools: Read, Write, Bash` is invalid — FAIL with file citation. Tag as `[TOPOLOGY]` in Remediation List.
 
 **Soft fail (warn only):**
 - Test stubs exist if testing agent in topology
@@ -119,12 +122,20 @@ Write `handoffs/review.md`:
 - [ ] WARN: tasks/todo.md is empty
 
 ## Remediation List
-<!-- Scaffolder reads this section on retry. One action per line. -->
-- [FR_ORPHANED] FR-4 (payment processing): add to backend agent Responsibilities section + write tests/unit/payment.test.js stub
-- [AGENT_QUALITY] .claude/agents/frontend.md: replace generic Project Context with actual project name, stack (React/Vite), and assigned FRs (FR-2, FR-6)
-- [AGENT_QUALITY] .claude/agents/testing.md: inject "How to Work" section (see scaffolder.md for canonical text)
-- [TOPOLOGY] .claude/agents/reviewer.md: remove Write from tools list
-- [IMPL_LEAK] src/api/users.js: replace lines 12-18 with TODO stub — no real SQL
+<!-- Scaffolder reads this section on retry. One action per line. Required fields per tag — missing fields must be written as UNKNOWN, never omitted. -->
+<!-- FORMAT RULES:
+[FR_ORPHANED]   fr:<FR-N> desc:"<FR description>" assign-to:<agent-file-path> stub:<test-stub-path-to-create>
+[AGENT_QUALITY] file:<agent-file-path> section:"<section name>" fix:"<exact replacement text or 'see scaffolder.md § <section>'>"
+[TOPOLOGY]      file:<agent-file-path> change:"<add|remove> <tool-name> from tools list"
+[IMPL_LEAK]     file:<src-file-path> lines:<start>-<end> replacement:"TODO: [agent-name] implements this — see handoffs/brief.md FR-N"
+[HOOK_MISSING]  file:<hook-file-path> action:"copy from AgentForge .claude/hooks/<filename>"
+[STRUCTURE]     file:<file-path> action:"<create with content X | copy from Y>"
+-->
+- [FR_ORPHANED] fr:FR-4 desc:"payment processing" assign-to:.claude/agents/backend.md stub:tests/unit/payment.test.js
+- [AGENT_QUALITY] file:.claude/agents/frontend.md section:"Project Context" fix:"replace generic placeholders with: project name=MyApp, stack=React/Vite, FRs=FR-2 FR-6"
+- [AGENT_QUALITY] file:.claude/agents/testing.md section:"How to Work" fix:"see scaffolder.md § How to Work (inject verbatim)"
+- [TOPOLOGY] file:.claude/agents/reviewer.md change:"remove Write from tools list"
+- [IMPL_LEAK] file:src/api/users.js lines:12-18 replacement:"TODO: backend agent implements user query — see handoffs/brief.md FR-1"
 ```
 
 ## Rules
@@ -136,4 +147,5 @@ Write `handoffs/review.md`:
 - Never check for implementation evidence (routes, DB queries, working code) — this is a scaffold, not finished code
 - Be specific: cite file paths and line numbers for every issue
 - The Remediation List MUST be present in every FAIL result — the scaffolder depends on it
+- Every Remediation List item MUST include all required fields for its tag type (see FORMAT RULES comment). If a field value cannot be determined, write `UNKNOWN` explicitly — never omit the field
 - A PASS means "this scaffold is correctly configured and ready for a developer to open and build from"
