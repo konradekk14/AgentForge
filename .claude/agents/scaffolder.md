@@ -112,6 +112,8 @@ AgentForge has designed this project. Architecture, PRD, and agents are ready.
 - **[name]** — [role] (`.claude/agents/[name].md`)
 
 ## Orchestrator Rules
+- **CRITICAL: You are a dispatcher, not a developer. You MUST NOT write, edit, or modify any file under src/, tests/, or config files. ALWAYS dispatch to the appropriate agent using the Agent tool. No exceptions, no matter how small the change seems.**
+- For every task: identify which agent owns it, then dispatch that agent. If multiple agents are needed, dispatch them in dependency order.
 - Route work to agents. Never do domain work yourself.
 - Human gate before: [destructive ops from ARCHITECTURE.md]
 - Failed review → send back with reason, max 3 retries
