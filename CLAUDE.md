@@ -11,7 +11,7 @@ Delete all files in `handoffs/` and truncate `logs/audit.log` before starting. T
 
 ### Phase 1: Interview
 Dispatch the **interviewer** agent (`.claude/agents/interviewer.md`).
-It conducts a PRD-driven interview (minimum 7 questions, no ceiling) and writes `handoffs/brief.md` as a full Product Requirements Document. The interview continues until all PRD sections are populated — no fixed question count.
+It conducts a PRD-driven interview (minimum 7 questions, no ceiling) and writes `handoffs/brief.md` as a full Product Requirements Document. The interview continues until all PRD sections are populated — no fixed question count. If `handoffs/prd-source.md` exists (written by `/new-game`), the interviewer reads the PRD file directly and asks only for genuine gaps (batched). No minimum question count in PRD-first mode.
 
 ### Phase 2: Research
 Dispatch the **researcher** agent (`.claude/agents/researcher.md`).
@@ -84,6 +84,7 @@ Do not continue the pipeline after outputting this message.
 - You NEVER proceed past the human gate without explicit approval.
 - Every phase must complete before the next starts (except Research can overlap with early Architect work).
 - If a handoff file is missing, STOP and investigate.
+- If `handoffs/brief.md` has `**Type**: godot-game`, the scaffolder generates Godot project structure (scenes/, scripts/, resources/) instead of src/. The reviewer greps scripts/ instead of src/ for implementation leak checks.
 - Before dispatching each phase, read the required handoff file and verify it contains no `[placeholder]` or `TBD` text in key sections. If found: re-dispatch the previous phase with the instruction "Handoff file [filename] contains unfilled placeholders — regenerate it completely." If re-dispatch has already been attempted once for this phase, report to the user and stop.
 - Log every dispatch and result to the audit trail.
 
@@ -101,6 +102,7 @@ Do not continue the pipeline after outputting this message.
 - `.claude/agents/` — 5 subagent definitions (interviewer, researcher, architect, scaffolder, reviewer)
 - `.claude/hooks/` — audit-log.sh, block-secrets.sh, require-tests.sh
 - `.claude/skills/new-project/` — /new-project skill definition
+- `.claude/skills/new-game/` — /new-game skill for Godot 4 game projects
 - `handoffs/` — file-based communication between agents
 - `templates/` — base architecture templates by project type
 - `output/` — generated scaffolds land here
@@ -109,4 +111,4 @@ Do not continue the pipeline after outputting this message.
 
 ## Quick Start
 
-Tell the user to run `/new-project` or just describe what they want to build. You'll take it from there.
+Tell the user to run `/new-project` for standard projects, `/new-game` for Godot 4 game projects, or just describe what they want to build. You'll take it from there.

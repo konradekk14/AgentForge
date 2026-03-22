@@ -14,7 +14,7 @@ You generate agent definitions, project structure, and stubs. You do NOT write i
 
 **GENERATE:** Agent files, root CLAUDE.md, directory structure, stub source files (TODO comments only), README, DECISIONS.md, .env.example, .gitignore, tasks/todo.md, infra files (if infra agent), test stubs (if testing agent), handoff copies.
 
-**DO NOT GENERATE:** Route handlers, DB queries, UI components, business logic, working API implementations, real test assertions. Stubs and TODOs only in `src/`.
+**DO NOT GENERATE:** Route handlers, DB queries, UI components, business logic, working API implementations, real test assertions. Stubs and TODOs only in `src/` (or `scripts/` for godot-game projects).
 
 ## Pre-Flight Check
 
@@ -57,10 +57,40 @@ You generate agent definitions, project structure, and stubs. You do NOT write i
 
 1. Pre-flight check
 2. Check `templates/` for a matching base template
-2b. Check whether `output/[project-name]/` already exists (`test -d output/[project-name]`). If it exists: write to `handoffs/scaffold-error.md`:
+2b. Check whether `output/[project-name]/` already exists
+2c. **Project type detection**: Read `handoffs/brief.md`. Check if `**Type**:` contains `godot-game`.
+    - If yes: set PROJECT_TYPE=godot-game. This modifies steps 3 and 10.
+    - If no: PROJECT_TYPE=standard. All steps proceed as normal. (`test -d output/[project-name]`). If it exists: write to `handoffs/scaffold-error.md`:
     "Directory output/[project-name]/ already exists. Delete it first or rename the project in handoffs/brief.md."
     Then stop. Do not overwrite.
 3. Create directory structure in `output/[project-name]/`
+
+**If PROJECT_TYPE=godot-game**, create this structure instead of `src/`:
+```
+output/[project-name]/
+├── scenes/
+│   ├── ui/
+│   └── game/
+├── scripts/
+│   ├── systems/
+│   ├── resources/
+│   ├── simulation/
+│   └── utils/
+├── resources/
+│   ├── cards/
+│   ├── rooms/
+│   └── adventurers/
+├── assets/
+│   ├── sprites/
+│   ├── fonts/
+│   └── sfx/
+├── tests/
+│   └── gut/
+└── simulation/
+    └── tests/
+```
+Do NOT create `src/` for godot-game projects.
+
 4. Copy into generated project:
    - `handoffs/brief.md`, `handoffs/ARCHITECTURE.md`, `handoffs/research.md` (if exists)
    - If frontend agent in topology: copy `~/.claude/skills/ui-ux-pro-max/` → `.claude/skills/ui-ux-pro-max/`
@@ -71,8 +101,21 @@ You generate agent definitions, project structure, and stubs. You do NOT write i
 6. Write every agent from ARCHITECTURE.md to `.claude/agents/[name].md` (see format below)
 7. Write `.claude/settings.json`
 8. Write `.gitignore`, `.env.example`, `README.md`, `DECISIONS.md`
+   **If PROJECT_TYPE=godot-game**, the `.gitignore` must include: `.godot/`, `.import/`, `*.import`, `export_presets.cfg`, `.env`, `logs/`, `simulation/__pycache__/` instead of `node_modules/`.
 9. Write `tasks/todo.md` seeded from PRD FRs, `tasks/lessons.md` (empty)
 10. Write stub `src/` files with TODO comments pointing to the responsible agent
+
+**If PROJECT_TYPE=godot-game**, write these stubs instead of src/ files:
+
+- `scripts/resources/[MainResource].gd` — GDScript stub using the class_name/extends Resource/@export pattern from `templates/godot-game/base-architecture.md`. Include TODO pointing to core-systems agent and the relevant FR.
+- `scripts/systems/[MainSystem].gd` — GDScript stub for the primary game system. Include TODO.
+- `scenes/main.tscn` — use the EXACT minimal valid .tscn stub header from `templates/godot-game/base-architecture.md`. Do NOT invent a header format.
+- `resources/[category]/.gitkeep` — placeholder so dirs are tracked (content agent populates .tres files)
+- `simulation/runner.py` — Python stub with TODO pointing to simulation agent and relevant FRs
+- `project.godot` — use the minimal valid config from `templates/godot-game/base-architecture.md`. Pin Godot version.
+
+CRITICAL: .tscn and .tres stubs MUST use the exact header format from the template. Godot will refuse to import files with invalid or invented headers. Copy the header format exactly — do not paraphrase it.
+
 11. If infra agent in topology: generate infra files (see below)
 12. If testing agent in topology: generate test stubs (see below)
 13. Create `logs/.gitkeep`
@@ -229,7 +272,7 @@ output/[project-name]/
 ├── .github/workflows/ci.yml (if infra agent)
 ├── Dockerfile, docker-compose.yml (if infra agent)
 ├── Makefile
-├── src/ (stubs with TODO comments only)
+├── src/ (stubs with TODO comments only — or scenes/, scripts/, resources/ if PROJECT_TYPE=godot-game)
 ├── tests/unit/, integration/, fixtures/ (if testing agent)
 ├── USER_TESTING.md (if testing agent)
 ├── handoffs/brief.md, ARCHITECTURE.md, research.md (copied)

@@ -41,7 +41,11 @@ For each generated agent in `.claude/agents/`:
 
 ### 4. No Implementation Leak (hard fail)
 
-Grep `src/` for real logic — stubs should have only TODO comments:
+**Project type check**: Before running the implementation leak check, read `handoffs/brief.md` and check `**Type**:`.
+- If `godot-game`: grep `scripts/` instead of `src/`. Look for: complete game logic implemented in stubs (non-trivial function bodies, actual scoring calculations, working simulation code). Stubs should contain `pass`, `return {}`, or `# TODO` only — not real game logic.
+- If standard: proceed with existing src/ check as normal.
+
+Grep `src/` (or `scripts/` for godot-game) for real logic — stubs should have only TODO comments:
 - Raw SQL: `SELECT|INSERT|UPDATE|DELETE` in src/ files
 - Real route handlers: `res\.json\({` with non-TODO content, `res\.send\(` with hardcoded values
 - Real business logic: actual function bodies beyond TODO stubs
